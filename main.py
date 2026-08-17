@@ -11,13 +11,21 @@ def parse():
         
     ydl_opts = {
         'format': 'best[ext=mp4]/best',
-        'quiet': True
+        'quiet': True,
+        # 유튜브 봇 감지를 피하기 위해 iOS 및 MWEB 클라이언트로 위장
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['ios', 'mweb']
+            }
+        }
     }
     
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             video_url = info.get('url')
+            if not video_url:
+                return jsonify({"status": "error", "message": "No video URL found"}), 400
             return jsonify({"status": "success", "url": video_url})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
